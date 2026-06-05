@@ -28,3 +28,4 @@ next-env.d.ts
 .claude/
 /app/generated/prisma
 node_modules
+node_modules
