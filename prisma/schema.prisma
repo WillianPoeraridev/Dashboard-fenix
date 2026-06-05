@@ -1,0 +1,87 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["comercial", "retencao", "shared", "public"]
+}
+
+// ========================
+// Auth (schema public)
+// ========================
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("GERENTE")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("public")
+}
+
+// ========================
+// SHARED
+// ========================
+
+model Customer {
+  id              String  @id @default(cuid())
+  cpfCnpj         String  @unique
+  nome            String
+  contatoPrimario String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("shared")
+}
+
+// ========================
+// COMERCIAL
+// ========================
+
+model Venda {
+  id            String    @id
+  competenciaId String
+  data          DateTime?
+  definicao     String
+  nomeCliente   String
+  regiao        String
+  valorCents    Int?
+  customerId    String?
+  vendedorId    String
+
+  @@schema("comercial")
+}
+
+model LeadCarteira {
+  id          String @id
+  nomeCliente String
+  vendedorId  String
+  customerId  String?
+
+  @@schema("comercial")
+}
+
+// ========================
+// RETENCAO
+// ========================
+
+model SolicitacaoRetencao {
+  id           String    @id
+  nomeCliente  String
+  status       String
+  motivo       String?
+  regiao       String
+  ticketCents  Int?
+  customerId   String?
+  dataRegistro DateTime  @default(now())
+
+  @@schema("retencao")
+}
