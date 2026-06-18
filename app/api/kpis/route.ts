@@ -42,8 +42,10 @@ export async function GET(req: Request) {
       select: { valorCents: true, regiao: true },
     });
 
-    // Leads
-    const totalLeads = await prisma.leadCarteira.count();
+    // Leads — contados no mesmo período das vendas, senão a conversão fica distorcida
+    const totalLeads = await prisma.leadCarteira.count({
+      where: { createdAt: { gte: inicio, lte: fim } },
+    });
 
     // Retenção
     const retencoes = await prisma.solicitacaoRetencao.findMany({

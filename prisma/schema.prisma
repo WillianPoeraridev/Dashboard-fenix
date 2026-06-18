@@ -61,10 +61,11 @@ model Venda {
 }
 
 model LeadCarteira {
-  id          String @id
+  id          String   @id
   nomeCliente String
   vendedorId  String
   customerId  String?
+  createdAt   DateTime
 
   @@schema("comercial")
 }

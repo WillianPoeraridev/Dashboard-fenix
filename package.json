@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint",
+    "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -14,7 +15,6 @@
     "@supabase/supabase-js": "^2.49.0",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
-    "bcryptjs": "^2.4.3",
     "dotenv": "^17.4.2",
     "next": "^16.0.0",
     "next-auth": "^4.24.14",
@@ -25,11 +25,11 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.0"
   }
 }
