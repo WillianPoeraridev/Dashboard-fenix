@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 interface KpiData {
@@ -82,11 +82,6 @@ export default function DashboardPage() {
             style={{ padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }}>
             {[2024, 2025, 2026].map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
-          <span style={{ fontSize: 13, color: "#6b7280" }}>{session.user?.name}</span>
-          <button onClick={() => signOut({ callbackUrl: "/login" })}
-            style={{ padding: "6px 14px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", cursor: "pointer", fontSize: 13 }}>
-            Sair
-          </button>
         </div>
       </div>
 

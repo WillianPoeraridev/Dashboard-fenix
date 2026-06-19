@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
+import { Navbar } from "./navbar";
 
 export const metadata: Metadata = {
   title: "Fênix Dashboard",
@@ -10,7 +11,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body style={{ margin: 0, fontFamily: "Inter, system-ui, sans-serif", backgroundColor: "#f3f4f6", color: "#111827" }}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

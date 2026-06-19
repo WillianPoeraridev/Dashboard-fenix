@@ -6,8 +6,8 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
-  // Rotas públicas
-  if (pathname === "/login" || pathname.startsWith("/api/auth")) {
+  // Rotas públicas (/api/sso/enter cria a sessão via passe, entra sem token)
+  if (pathname === "/login" || pathname.startsWith("/api/auth") || pathname === "/api/sso/enter") {
     if (token && pathname === "/login") {
       return NextResponse.redirect(new URL("/", request.url));
     }
