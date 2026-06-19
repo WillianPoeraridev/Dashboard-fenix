@@ -46,13 +46,22 @@ model Customer {
 // COMERCIAL
 // ========================
 
+enum Regiao {
+  MATRIZ
+  LITORAL
+  SINOS
+  FORA_AREA
+
+  @@schema("comercial")
+}
+
 model Venda {
   id            String    @id
   competenciaId String
   data          DateTime?
   definicao     String
   nomeCliente   String
-  regiao        String
+  regiao        Regiao
   valorCents    Int?
   customerId    String?
   vendedorId    String
@@ -74,12 +83,42 @@ model LeadCarteira {
 // RETENCAO
 // ========================
 
+enum StatusRetencao {
+  CANCELADO
+  RETIDO
+  INADIMPLENCIA
+
+  @@schema("retencao")
+}
+
+enum MotivoCancelamento {
+  INSATISFACAO_ATD
+  INSATISFACAO_SERVICO
+  MUDANCA_ENDERECO
+  MOTIVOS_PESSOAIS
+  TROCA_PROVEDOR
+  PROBLEMAS_FINANC
+  OUTROS
+  INADIMPLENCIA_90
+
+  @@schema("retencao")
+}
+
+enum RegiaoRetencao {
+  SINOS
+  LITORAL
+  MATRIZ
+
+  @@map("Regiao")
+  @@schema("retencao")
+}
+
 model SolicitacaoRetencao {
   id           String    @id
   nomeCliente  String
-  status       String
-  motivo       String?
-  regiao       String
+  status       StatusRetencao
+  motivo       MotivoCancelamento?
+  regiao       RegiaoRetencao
   ticketCents  Int?
   customerId   String?
   dataRegistro DateTime  @default(now())
