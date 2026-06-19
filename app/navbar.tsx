@@ -28,18 +28,23 @@ export function Navbar() {
       top: 0,
       zIndex: 40,
     }}>
+      {/* Esquerda: logo + páginas do app */}
       <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
         <Link href="/" style={{ fontWeight: 700, fontSize: 14, color: "#fff", letterSpacing: "-0.01em", textDecoration: "none" }}>
           Fênix Dashboard
         </Link>
         <div style={{ display: "flex", gap: 2 }}>
           <NavLink href="/" atual={pathname === "/"}>Painel</NavLink>
-          <SsoLink to={COMERCIAL}>Comercial</SsoLink>
-          <SsoLink to={RETENCAO}>Retenção</SsoLink>
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Direita: navegação entre apps (fixa) + usuário */}
+      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <div style={{ display: "flex", gap: 2 }}>
+          <SsoLink to={COMERCIAL}>Comercial</SsoLink>
+          <SsoLink to={RETENCAO}>Retenção</SsoLink>
+        </div>
+        <div style={{ width: 1, height: 24, backgroundColor: "#2a3340" }} />
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
             width: 28, height: 28, borderRadius: "50%", backgroundColor: "#f97316", color: "#fff",
