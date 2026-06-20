@@ -63,6 +63,8 @@ npm install
 ```
 O Prisma Client é gerado automaticamente (postinstall / build).
 
+> **pnpm 11+ (CRMs):** na primeira instalação o pnpm bloqueia os build scripts e gera um `pnpm-workspace.yaml` (untracked) com um bloco `allowBuilds:` em placeholder. Enquanto não preenchido, `pnpm install`/`pnpm dev` falha com `ERR_PNPM_IGNORED_BUILDS`. Edite o `pnpm-workspace.yaml` de cada CRM pondo todos os pacotes (`@prisma/engines`, `bcrypt`, `esbuild`, `prisma`, `sharp`, `unrs-resolver`) como `true` e rode `pnpm install` de novo. Pra só gerar o Prisma client sem o pré-check: `node node_modules/prisma/build/index.js generate`.
+
 ## 4. Rodar local (portas diferentes pra não colidir)
 
 ```bash
@@ -70,7 +72,7 @@ O Prisma Client é gerado automaticamente (postinstall / build).
 pnpm dev                 # http://localhost:3000
 
 # crm-retencao-fenix
-pnpm dev -- -p 3001      # http://localhost:3001
+pnpm dev -p 3001         # http://localhost:3001  (NÃO use `-- -p`: o `--` vira nome de diretório)
 
 # Dashboard-fenix
 npm run dev -- -p 3002   # http://localhost:3002
