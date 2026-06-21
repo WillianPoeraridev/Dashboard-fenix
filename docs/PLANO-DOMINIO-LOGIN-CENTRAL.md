@@ -111,10 +111,16 @@ derrubar o acesso de ninguém, e nenhuma etapa pode escrever/destruir dados
 - **Banco:** portal só faz `findUnique` (leitura) e seta cookie; shadow models só
   `generate`. Nenhuma escrita. `db push` proibido no Dashboard.
 
-## Status de execução (atualizar conforme avança)
-- [ ] Etapa 1 — domínios no Vercel
-- [ ] Etapa 2 — DNS no Registro.br (Willian)
-- [ ] Etapa 3 — portal de login no Dashboard
-- [ ] Etapa 4 — abrir `enter` dos CRMs
-- [ ] Etapa 5 — env/URLs (virada)
-- [ ] Etapa 6 — verificação
+## Status de execução
+- [x] Etapa 1 — domínios no Vercel (3 projetos, verified)
+- [x] Etapa 2 — DNS no Registro.br (A apex + 3 CNAMEs) + SSL (4 domínios servindo 200)
+- [x] Etapa 3 — portal de login no Dashboard (`/api/portal/login` + shadow models + middleware)
+- [x] Etapa 4 — `enter` dos CRMs aceita qualquer usuário ativo
+- [x] Etapa 5 — virada: `NEXTAUTH_URL`, `NEXT_PUBLIC_*`, `APPS` pros domínios; `www`→apex (308)
+- [~] Etapa 6 — verificação automática OK (login pages 200, portal 401, raiz→/login).
+      Falta confirmar login real por perfil (Marcelo→Dashboard, vendedor→Comercial, atendente→Retenção).
+
+### Mapa final em produção
+- `https://crm-operacional.com.br` → Dashboard (portal de login + painel gerência)
+- `https://comercial.crm-operacional.com.br` → CRM Comercial
+- `https://retencao.crm-operacional.com.br` → CRM Retenção
