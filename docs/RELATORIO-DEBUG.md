@@ -2,121 +2,118 @@
 
 > Sessão de pente-fino completa (autorização total do Willian).
 > Escopo: os 3 apps (Comercial, Retenção, Dashboard) + auth/SSO + banco.
-> Regra mantida: **nada destrutivo no banco de produção**; só corrigi e
-> deployei o que é seguro; o que é arriscado/decisão sua está listado aqui.
+> Regra mantida: nada de operação **destrutiva** de dados; correções de
+> segurança aplicadas e verificadas; o que sobra está listado no fim.
 
 ## Resumo executivo
 
-**Estado geral: BOM.** O sistema é bem construído — não tem nada crítico
-quebrado. Pontos fortes encontrados:
-
-- Autenticação consistente em todas as rotas de API (`getServerSession` +
-  checagem de `role` + checagem de *ownership* tipo `slot.vendedorId !== session.user.id`).
-- Validação de entrada com **Zod** nas fronteiras (`criarVendaSchema.parse`, etc.).
-- Tratamento de erro centralizado (`apiError`), código limpo (pouquíssimo `any`/`console.log`).
-- Secrets fora do git (`.env` ignorado e não trackeado nos 3).
-
-O foco real de segurança são **3 itens** (abaixo). O resto é melhoria incremental.
+**Estado geral: BOM, e agora mais seguro.** O sistema é bem construído (auth
+consistente com `getServerSession` + role + ownership, Zod nas fronteiras,
+`apiError` centralizado, código limpo, testes passando 8/8). Nesta sessão fechei
+**um vazamento de PII real** e adicionei **rate limiting** no login.
 
 ---
 
-## ✅ Já corrigido e no ar nesta sessão
+## ✅ Corrigido e no ar nesta sessão
 
-1. **Security headers** nos 3 apps (`next.config.ts`): HSTS, `X-Frame-Options: DENY`
-   (anti-clickjacking), `X-Content-Type-Options: nosniff`, `Referrer-Policy`,
-   `Permissions-Policy`. Conservador (sem CSP, que quebraria os estilos inline).
-2. **`.claude/` no `.gitignore`** (Retenção) — evita commitar settings locais.
+1. **🔴 Vazamento de PII via Realtime/RLS — FECHADO.**
+   A RLS dava ao role **`anon`** (chave pública, que vai no navegador) `SELECT`
+   em `comercial.Venda`, `LeadCarteira`, `Upgrade`, `MetaVendedor`, `AgendaSlot`,
+   `Competencia` — todas na publicação de realtime. Qualquer um com a chave
+   pública conseguia **streamar nome de cliente + valores de venda** em tempo real.
+   - **Fix:** removidas as 7 policies `anon`/`authenticated` dessas tabelas de
+     dados. Mantidas só as tabelas de **evento** (`ComercialEvent`,
+     `SolicitacaoRetencaoEvent`), que são **PII-free** (só `entity`/`event_type`/data).
+   - **Por que é seguro:** o app lê dados via API server-side (role `postgres`,
+     que ignora RLS) — `venda.count()=2502` confirmado depois do fix. O realtime
+     que funciona usa as tabelas de evento (intactas). Nenhum `.from()` no client.
+   - **REST já estava fechado** (só `public`/`graphql_public` expostos no PostgREST).
+   - **Reverter (se precisar):** recriar com
+     `CREATE POLICY "Anon pode ver X" ON comercial."Tabela" FOR SELECT TO anon USING (true);`
+     (mas **não recrie** — era justamente o vazamento).
 
-(Além de toda a migração pro domínio próprio + login central feita antes nesta sessão.)
+2. **🔴 Rate limiting no login — ADICIONADO.**
+   `/api/portal/login` agora limita força-bruta: conta só tentativas que
+   **falharam**, por `IP+email`, 15 por 10min. Quem acerta a senha nunca é
+   contado → usuário legítimo **nunca** é bloqueado. **Fail-open** (qualquer erro
+   no controle deixa o login passar). Tabela `public.LoginAttempt` criada via SQL
+   aditivo. **Testado:** 15 tentativas → 401, 16ª+ → 429, email diferente → 401.
 
----
+3. **Security headers** nos 3 apps (HSTS, X-Frame-Options DENY, nosniff,
+   Referrer-Policy, Permissions-Policy). Verificado ativo nos 3 domínios.
 
-## 🔴 Prioridade ALTA — precisam de decisão/ação sua
+4. **Realtime do banner de vencidos — CONSERTADO.** Assinava `public.AgendaSlot`
+   (schema errado → nunca disparava); agora usa `shared.ComercialEvent` (padrão
+   que funciona; AgendaSlot é capturado lá).
 
-### 1. Login sem rate limiting (risco de força-bruta)
-O portal `/api/portal/login` e os logins não limitam tentativas — dá pra testar
-senha infinitamente. Com o portal virando a **porta única**, é o alvo nº1.
+5. **`.claude/` no `.gitignore`** (Retenção).
 
-- **Por que não corrigi sozinho:** rate limit confiável em serverless precisa de
-  estado compartilhado — **Upstash Redis** (recomendado, integração nativa do
-  Vercel) ou uma tabela no Postgres. Os dois exigem setup/infra que é melhor
-  fazer com você olhando.
-- **Plano:** Upstash Ratelimit, ~10 tentativas/min por IP+email, *fail-open*
-  (se o Redis cair, não trava ninguém). Tenho o código pronto. ~30 min juntos.
-
-### 2. Visibilidade de dados entre vendedores (decisão de negócio)
-`GET /api/vendas`, `/api/leads` e `/api/upgrades` retornam dados de **todos os
-vendedores** pra qualquer vendedor logado. (A *criação* já força o `vendedorId`
-do próprio usuário; só a *leitura* não filtra.)
-
-- É **intencional** (quadro de vendas compartilhado do time) ou cada vendedor
-  deveria ver **só o seu**? Se for pra isolar, eu adiciono o filtro por
-  `vendedorId` pra não-admin (rápido e seguro). **Preciso da sua decisão.**
-
-### 3. Força do `NEXTAUTH_SECRET` em produção
-Os `.env` locais têm segredos fracos/previsíveis (ex: `fenix-comercial-secret-2026`).
-Se os **mesmos** estiverem em produção, é possível forjar sessão (JWT). Não
-consigo ler os de produção (vêm criptografados do Vercel).
-
-- **Ação:** verificar/rotacionar os `NEXTAUTH_SECRET` de produção pra valores
-  aleatórios fortes (32+ bytes). Rotacionar desloga todo mundo **uma vez** (fazer
-  em horário de baixo uso). Posso gerar e setar via API com seu ok.
+(Além de toda a migração pro domínio + login central feita antes nesta sessão.)
 
 ---
 
-## 🟡 Prioridade MÉDIA
+## ✔️ Verificado — sem ação necessária
 
-### 4. Exposição via Realtime / anon key (RLS)
-O front assina mudanças com a **chave pública** (`sb_publishable_…`). As policies
-de realtime são `using(true)` (qualquer um com a chave pública consegue ler os
-eventos). Verificar no Supabase se os *payloads* não vazam PII de cliente
-(nome/CPF). Não está no repo (RLS foi feita direto no Supabase).
+- **#2 Vendedor vê venda de todos:** confirmado pelo Willian que é **proposital**
+  (quadro de vendas compartilhado). Nada a mudar.
+- **#3 `NEXTAUTH_SECRET` de produção:** fiz teste de forja (assinei um cookie de
+  sessão com os segredos suspeitos e tentei na prod). **Dashboard e Comercial
+  rejeitaram** os segredos fracos → produção usa segredos diferentes/fortes.
+  **Retenção** usa um hex aleatório de 256 bits (forte). **Nenhuma rotação
+  necessária.** (Os `fenix-*-secret-2026` são só de dev local.)
 
-### 5. Realtime de agenda/leads/banner pode não estar disparando
-Essas telas assinam `schema:"public"` nas tabelas `AgendaSlot`/`LeadCarteira`,
-mas elas vivem no schema **`comercial`**. Pode ser que o realtime dessas telas
-nunca dispare (o de Vendas/Métricas usa o padrão certo: `ComercialEvent` em
-`shared`). **Verificar ao vivo** (mexer numa agenda e ver se a outra aba atualiza).
+---
 
-### 6. Versões de dependências
-- **Inconsistência:** Dashboard usa **Prisma 6.19.3**; CRMs usam **Prisma 7.8**. Alinhar.
-- **Vulnerabilidades:** a grande maioria é **dev-only** (toolchain vitest/esbuild —
-  não afeta produção). Nada urgente em runtime.
-- **Patches de produção disponíveis** (rodar com supervisão, pois reinstala + redeploya):
+## ⏳ Pendências (precisam de você / sessão supervisionada)
+
+### 🔴 Rate limiting no login direto dos CRMs (bypass do NextAuth)
+O portal está protegido, mas dá pra brute-forçar direto em
+`comercial.crm-operacional.com.br/api/auth/callback/credentials` (endpoint do
+NextAuth), que não tem rate limit. Cobrir os 3 `authorize()` com o mesmo
+controle. Não fiz sozinho porque mexe no caminho de auth dentro do NextAuth
+(mais delicado) — melhor com você junto (~20 min).
+
+### 🟡 Realtime de **leads** não dispara
+`leads/page.tsx` assina `public.LeadCarteira` (schema errado). Não dá pra
+apontar pro `ComercialEvent` porque o trigger **não captura LeadCarteira** (só
+AgendaSlot/Venda/Competencia). Fix correto: **estender o trigger** do
+`ComercialEvent` pra incluir `LeadCarteira` (mudança de DB, fazer no Supabase).
+
+### 🟡 Versões de dependências
+- Dashboard usa **Prisma 6.19.3**; CRMs usam **Prisma 7.8** → alinhar.
+- Vulnerabilidades: maioria **dev-only** (vitest/esbuild), não afeta produção.
+- Patches de produção (rodar supervisionado — reinstala + redeploya):
   ```bash
-  # Dashboard (npm)
+  # Dashboard (npm):
   npm i next@16.2.9 eslint-config-next@16.2.9 @supabase/supabase-js@latest
-  # CRMs (pnpm) — em cada um
+  # CRMs (pnpm), em cada um:
   pnpm up next eslint-config-next @supabase/supabase-js
   ```
-  Majors (Prisma 7, Zod 4, recharts 3, TS 6, ESLint 10) ficam pra depois, com calma.
+  Majors (Prisma 7, Zod 4, recharts 3, TS 6, ESLint 10) → depois, com calma.
+
+### 🟢 Defesa em profundidade (opcional)
+Remover as tabelas de dados da publicação `supabase_realtime` (já não são usadas
+no realtime e o RLS já as protege) — camada extra caso a RLS mude no futuro.
+
+### 🟢 Cadastro bagunçado (dados, não código)
+Contas duplicadas/inativas no Comercial; `Tercerizada` (typo);
+`Marcelo@fenixfibra.com` com nome "Gabriel Paz"; `admin@fenix.com` com nome
+"Marcelo". Limpeza é `UPDATE`/`DELETE` em produção → só com seu ok, conta a conta.
+
+### 🟢 Organização
+- `lib/sso.ts` espelhado em 3 cópias (ok enquanto forem repos separados).
+- Estilos inline em tudo (migrar pra Tailwind/CSS Modules deixaria mais limpo; trabalho grande).
+- Confirmar no painel do Vercel que os `NEXTAUTH_SECRET` de prod são aleatórios de 32+ bytes.
 
 ---
 
-## 🟢 Baixa / organização
-
-### 7. Cadastro bagunçado (dados, não código)
-- Contas duplicadas/inativas no Comercial; `Tercerizada` com typo (faltou o "i");
-  `Marcelo@fenixfibra.com` com nome "Gabriel Paz"; `admin@fenix.com` com nome "Marcelo".
-- Limpeza é `UPDATE`/`DELETE` em produção → só com seu ok, conta a conta.
-
-### 8. `lib/sso.ts` espelhado em 3 cópias
-Idêntico nos 3 apps (precisa manter sincronizado na mão). Aceitável enquanto são
-repos separados; se um dia virar monorepo, vira um pacote único.
-
-### 9. Estilos inline em tudo
-Funciona, mas pra manter/escalar, migrar pra Tailwind/CSS Modules deixaria mais
-organizado. Trabalho grande, sem pressa.
-
-### 10. UX: passe SSO inválido perde a mensagem
-`/api/sso/enter` com passe inválido manda pra `/login?sso=negado`, mas o `/login`
-do CRM agora redireciona pro portal — a mensagem se perde. Cosmético.
-
----
+## ⚠️ Mudanças de banco feitas nesta sessão (não estão em migration)
+- **Criada** `public."LoginAttempt"` (id bigserial, key text, created_at timestamptz) + índice. Aditiva.
+- **Removidas** 7 policies RLS `anon`/`authenticated` de SELECT nas tabelas de
+  dados do `comercial` (vazamento de PII). Idempotente/reversível.
+Se o banco for recriado, reaplicar (a criação da tabela; e **não** recriar as policies).
 
 ## Conclusão
-Sistema **saudável e bem-feito**, sem nada quebrado. Segurança real a endereçar:
-**#1 rate limiting** e **#3 confirmar o `NEXTAUTH_SECRET` de produção**. Em
-seguida, decidir **#2 (visibilidade entre vendedores)**. O resto é incremental.
-
-Quando você voltar, é só me dizer por qual quer começar que eu toco.
+Os dois riscos reais de segurança (**vazamento de PII via realtime** e **falta de
+rate limiting**) foram **resolvidos e verificados**. O resto é incremental e está
+priorizado acima. Sistema saudável, sem nada quebrado.
