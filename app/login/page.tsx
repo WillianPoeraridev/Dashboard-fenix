@@ -1,34 +1,38 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
     setLoading(true);
 
-    const res = await signIn("credentials", {
-      email,
-      password: senha,
-      redirect: false,
-    });
+    try {
+      const res = await fetch("/api/portal/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, senha }),
+      });
+      const data = await res.json();
 
-    setLoading(false);
+      if (!res.ok) {
+        setErro(data.error ?? "Email ou senha inválidos.");
+        setLoading(false);
+        return;
+      }
 
-    if (res?.error) {
-      setErro("Email ou senha inválidos.");
-    } else {
-      router.push("/");
-      router.refresh();
+      // Pode ser uma rota local ("/") ou outro app (passe SSO cross-domain),
+      // então usamos navegação completa em vez do router do Next.
+      window.location.href = data.redirect;
+    } catch {
+      setErro("Erro ao entrar. Tente novamente.");
+      setLoading(false);
     }
   }
 
@@ -49,10 +53,10 @@ export default function LoginPage() {
       }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", marginTop: 8 }}>
-            Fênix Dashboard
+            Fênix
           </h1>
           <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>
-            Painel gerencial — faça login para acessar
+            Faça login para acessar seu painel
           </p>
         </div>
 

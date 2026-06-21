@@ -79,6 +79,20 @@ model LeadCarteira {
   @@schema("comercial")
 }
 
+// Shadow model só-leitura do User do CRM Comercial (usado pelo portal de login
+// central pra validar credencial e rotear). Campos subset; `role` é omitido de
+// propósito (o setor vem de QUAL tabela tem o email — evita ler o enum/P2032).
+model ComercialUser {
+  id           String  @id
+  name         String
+  email        String  @unique
+  passwordHash String
+  isActive     Boolean
+
+  @@map("User")
+  @@schema("comercial")
+}
+
 // ========================
 // RETENCAO
 // ========================
@@ -123,5 +137,18 @@ model SolicitacaoRetencao {
   customerId   String?
   dataRegistro DateTime  @default(now())
 
+  @@schema("retencao")
+}
+
+// Shadow model só-leitura do User do CRM Retenção (portal de login central).
+// Mesmo padrão do ComercialUser: subset de campos, `role` omitido.
+model RetencaoUser {
+  id           String  @id
+  name         String
+  email        String  @unique
+  passwordHash String
+  isActive     Boolean
+
+  @@map("User")
   @@schema("retencao")
 }
