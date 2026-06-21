@@ -10,7 +10,36 @@ import { gerarPasse, APPS } from "@/lib/sso";
 //  - gerência  -> cria a sessão local do Dashboard e fica aqui.
 //  - vendedor  -> gera um "passe" SSO e manda pro Comercial (/api/sso/enter).
 //  - atendente -> idem pro Retenção.
-// Só LÊ do banco (findUnique) e seta cookie. Nenhuma escrita.
+// Só LÊ do banco (findUnique) e seta cookie. Nenhuma escrita (exceto o
+// registro de tentativas falhas pro rate limiting, abaixo).
+
+// Rate limiting (anti força-bruta): conta só tentativas que FALHARAM, por
+// IP+email, numa janela curta. Quem acerta a senha nunca é contado, então
+// usuário legítimo nunca é bloqueado. Tudo fail-open: se o controle der erro,
+// o login segue normal (um bug aqui jamais tranca ninguém).
+const RL_LIMIT = 15;
+const RL_WINDOW_MS = 10 * 60 * 1000; // 10 minutos
+
+function getIp(req: Request): string {
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0]!.trim();
+  return req.headers.get("x-real-ip") ?? "unknown";
+}
+
+async function registrarFalha(key: string) {
+  try {
+    await prisma.loginAttempt.create({ data: { key } });
+    // Limpeza oportunista (5% das vezes) pra tabela não crescer indefinidamente.
+    if (Math.random() < 0.05) {
+      await prisma.loginAttempt.deleteMany({
+        where: { createdAt: { lt: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+      });
+    }
+  } catch (e) {
+    console.error("[portal] falha ao registrar tentativa (fail-open)", e);
+  }
+}
+
 export async function POST(req: Request) {
   let email = "";
   let senha = "";
@@ -27,6 +56,22 @@ export async function POST(req: Request) {
 
   if (!email || !senha) {
     return NextResponse.json({ error: "Informe email e senha." }, { status: 400 });
+  }
+
+  const key = `${getIp(req)}|${email.slice(0, 120)}`;
+
+  // Rate limiting (fail-open).
+  try {
+    const desde = new Date(Date.now() - RL_WINDOW_MS);
+    const falhas = await prisma.loginAttempt.count({ where: { key, createdAt: { gt: desde } } });
+    if (falhas >= RL_LIMIT) {
+      return NextResponse.json(
+        { error: "Muitas tentativas. Aguarde alguns minutos e tente novamente." },
+        { status: 429 },
+      );
+    }
+  } catch (e) {
+    console.error("[portal] checagem de rate limit falhou (fail-open)", e);
   }
 
   // 1. Gerência (public.User) — prioridade máxima.
@@ -75,5 +120,7 @@ export async function POST(req: Request) {
     });
   }
 
+  // Credencial inválida → registra a falha (pro rate limiting) e responde 401.
+  await registrarFalha(key);
   return NextResponse.json({ error: "Email ou senha inválidos." }, { status: 401 });
 }

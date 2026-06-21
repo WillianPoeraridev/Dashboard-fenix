@@ -26,6 +26,18 @@ model User {
   @@schema("public")
 }
 
+// Rate limiting do login: registra só tentativas que FALHARAM (por IP+email).
+// Tabela criada manualmente via SQL aditivo (nunca db push neste app).
+model LoginAttempt {
+  id        BigInt   @id @default(autoincrement())
+  key       String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([key, createdAt])
+  @@map("LoginAttempt")
+  @@schema("public")
+}
+
 // ========================
 // SHARED
 // ========================
