@@ -6,8 +6,14 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
-  // Rotas públicas (/api/sso/enter cria a sessão via passe, entra sem token)
-  if (pathname === "/login" || pathname.startsWith("/api/auth") || pathname === "/api/sso/enter") {
+  // Rotas públicas: /login (portal), /api/portal/login (valida e roteia),
+  // /api/sso/enter (cria sessão via passe). Todas entram sem token.
+  if (
+    pathname === "/login" ||
+    pathname.startsWith("/api/auth") ||
+    pathname === "/api/portal/login" ||
+    pathname === "/api/sso/enter"
+  ) {
     if (token && pathname === "/login") {
       return NextResponse.redirect(new URL("/", request.url));
     }
