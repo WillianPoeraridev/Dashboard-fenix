@@ -16,7 +16,10 @@ export async function POST(req: Request) {
   let senha = "";
   try {
     const body = await req.json();
-    email = (body.email ?? "").trim().toLowerCase();
+    // Não normalizamos o case: os emails no banco têm capitalização variada
+    // (ex: "Marcelo@fenixfibra.com") e o findUnique é case-sensitive — igual ao
+    // login direto dos CRMs. Só removemos espaços acidentais.
+    email = (body.email ?? "").trim();
     senha = body.senha ?? "";
   } catch {
     return NextResponse.json({ error: "Requisição inválida." }, { status: 400 });
