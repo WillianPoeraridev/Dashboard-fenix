@@ -7,9 +7,9 @@ const SECRET = process.env.SSO_SECRET ?? "";
 const VALIDADE_MS = 60_000; // 1 minuto
 
 export const APPS = {
-  comercial: "https://crm-comercial-fenix.vercel.app",
-  retencao: "https://crm-retencao-fenix.vercel.app",
-  dashboard: "https://fenix-dashboard-murex.vercel.app",
+  comercial: "https://comercial.crm-operacional.com.br",
+  retencao: "https://retencao.crm-operacional.com.br",
+  dashboard: "https://crm-operacional.com.br",
 } as const;
 
 export function urlPermitida(to: string): boolean {

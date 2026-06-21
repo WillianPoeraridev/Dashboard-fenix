@@ -4,8 +4,8 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const COMERCIAL = "https://crm-comercial-fenix.vercel.app";
-const RETENCAO = "https://crm-retencao-fenix.vercel.app";
+const COMERCIAL = "https://comercial.crm-operacional.com.br";
+const RETENCAO = "https://retencao.crm-operacional.com.br";
 
 export function Navbar() {
   const { data: session, status } = useSession();
