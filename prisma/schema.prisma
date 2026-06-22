@@ -38,6 +38,34 @@ model LoginAttempt {
   @@schema("public")
 }
 
+// Inputs manuais de Marketing (gerência). Tabela própria do Dashboard, criada via
+// SQL aditivo (nunca db push). RLS ligada sem policy; leitura/escrita só server-side.
+model MarketingInvestimento {
+  id         BigInt   @id @default(autoincrement())
+  ano        Int
+  mes        Int
+  canal      String   // valor de OrigemLead (ex: "ADS")
+  valorCents Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([ano, mes, canal])
+  @@map("MarketingInvestimento")
+  @@schema("public")
+}
+
+// Custos globais por competência (custo da equipe comercial, etc.).
+model CustoMensal {
+  id                        BigInt   @id @default(autoincrement())
+  ano                       Int
+  mes                       Int
+  custoEquipeComercialCents Int      @default(0)
+  updatedAt                 DateTime @updatedAt
+
+  @@unique([ano, mes])
+  @@map("CustoMensal")
+  @@schema("public")
+}
+
 // ========================
 // SHARED
 // ========================
@@ -67,16 +95,55 @@ enum Regiao {
   @@schema("comercial")
 }
 
+// Enums lidos (SELECT) nos shadow models precisam existir aqui senão o Prisma
+// falha com P2032. Espelham os enums reais do CRM Comercial.
+enum DefinicaoVenda {
+  VENDA
+  LEAD
+  INV_REGIAO
+  INV_PORTE
+  INV_INADIMPLENCIA
+
+  @@schema("comercial")
+}
+
+enum OrigemLead {
+  ADS
+  INDICACAO
+  JA_FOI_CLIENTE
+  MELHOR_PLANO
+  REDE_NEUTRA
+  TERCEIRIZADAS
+  MIDIAS_EXTERNAS
+  SEGUNDO_PONTO
+  NEXE
+  MIGRACAO
+
+  @@schema("comercial")
+}
+
+enum StatusInstalacao {
+  PENDENTE
+  SIM
+  AGENDADO
+  CANCELADO
+
+  @@schema("comercial")
+}
+
 model Venda {
-  id            String    @id
-  competenciaId String
-  data          DateTime?
-  definicao     String
-  nomeCliente   String
-  regiao        Regiao
-  valorCents    Int?
-  customerId    String?
-  vendedorId    String
+  id               String           @id
+  competenciaId    String
+  data             DateTime?
+  definicao        DefinicaoVenda
+  nomeCliente      String
+  origemLead       OrigemLead
+  regiao           Regiao
+  cidadeId         String
+  valorCents       Int?
+  statusInstalacao StatusInstalacao
+  customerId       String?
+  vendedorId       String
 
   @@schema("comercial")
 }
@@ -102,6 +169,46 @@ model ComercialUser {
   isActive     Boolean
 
   @@map("User")
+  @@schema("comercial")
+}
+
+// Shadow read-only da Competencia do CRM Comercial (metas/projeções do dashboard).
+model ComercialCompetencia {
+  id                    String @id
+  ano                   Int
+  mes                   Int
+  metaFinanceiraGeral   Int?
+  metaInstalacaoGeral   Int?
+  metaFinanceiraMatriz  Int?
+  metaFinanceiraLitoral Int?
+  metaFinanceiraSinos   Int?
+  diasUteis             Int?
+  diasTrabalhados       Int?
+  metaCancelamentoPct   Float?
+
+  @@unique([ano, mes])
+  @@map("Competencia")
+  @@schema("comercial")
+}
+
+// Shadow read-only das metas por vendedor.
+model MetaVendedor {
+  id             String @id
+  competenciaId  String
+  vendedorId     String
+  metaFinanceira Int?
+  metaInstalacao Int?
+
+  @@map("MetaVendedor")
+  @@schema("comercial")
+}
+
+// Shadow read-only das cidades do comercial (Top Cidades).
+model ComercialCidade {
+  id   String @id
+  nome String
+
+  @@map("Cidade")
   @@schema("comercial")
 }
 
@@ -140,14 +247,17 @@ enum RegiaoRetencao {
 }
 
 model SolicitacaoRetencao {
-  id           String    @id
-  nomeCliente  String
-  status       StatusRetencao
-  motivo       MotivoCancelamento?
-  regiao       RegiaoRetencao
-  ticketCents  Int?
-  customerId   String?
-  dataRegistro DateTime  @default(now())
+  id            String    @id
+  competenciaId String
+  nomeCliente   String
+  status        StatusRetencao
+  motivo        MotivoCancelamento?
+  regiao        RegiaoRetencao
+  cidade        String
+  ticketCents   Int?
+  atendenteId   String
+  customerId    String?
+  dataRegistro  DateTime  @default(now())
 
   @@schema("retencao")
 }
@@ -162,5 +272,31 @@ model RetencaoUser {
   isActive     Boolean
 
   @@map("User")
+  @@schema("retencao")
+}
+
+// Shadow read-only da Competencia do CRM Retenção (metas/comissão do dashboard).
+model RetencaoCompetencia {
+  id                     String @id
+  ano                    Int
+  mes                    Int
+  metaCancelamentos      Int?
+  orcamentoComissaoCents Int?
+  baseAtivosTotal        Int?
+  diasUteis              Int?
+  diasTrabalhados        Int?
+  metaDiariaManual       Int?
+
+  @@unique([ano, mes])
+  @@map("Competencia")
+  @@schema("retencao")
+}
+
+// Shadow read-only das cidades da retenção (nome legível por id).
+model RetencaoCidade {
+  id   String @id
+  nome String
+
+  @@map("Cidade")
   @@schema("retencao")
 }
