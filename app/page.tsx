@@ -33,7 +33,7 @@ export default function DashboardPage() {
   if (status === "loading") {
     return (
       <main style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-        <p style={{ color: "#6b7280" }}>Carregando...</p>
+        <p style={{ color: "var(--fg-muted)" }}>Carregando...</p>
       </main>
     );
   }
@@ -44,25 +44,25 @@ export default function DashboardPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>📊 Dashboard Fênix</h1>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <select value={mes} onChange={(e) => setMes(Number(e.target.value))} style={{ padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }}>
+          <select value={mes} onChange={(e) => setMes(Number(e.target.value))} style={{ padding: "6px 10px", border: "1px solid var(--border-strong)", borderRadius: 6, fontSize: 13, backgroundColor: "var(--surface)", color: "var(--fg)" }}>
             {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
-          <select value={ano} onChange={(e) => setAno(Number(e.target.value))} style={{ padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13 }}>
+          <select value={ano} onChange={(e) => setAno(Number(e.target.value))} style={{ padding: "6px 10px", border: "1px solid var(--border-strong)", borderRadius: 6, fontSize: 13, backgroundColor: "var(--surface)", color: "var(--fg)" }}>
             {[2024, 2025, 2026].map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
       </div>
 
       {/* Abas */}
-      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid #e5e7eb", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--border)", marginBottom: 20 }}>
         {ABAS.map((a) => (
           <button
             key={a.id}
             onClick={() => setAba(a.id)}
             style={{
               padding: "9px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14,
-              fontWeight: aba === a.id ? 700 : 500, color: aba === a.id ? "#f97316" : "#6b7280",
-              borderBottom: aba === a.id ? "2px solid #f97316" : "2px solid transparent", marginBottom: -1,
+              fontWeight: aba === a.id ? 700 : 500, color: aba === a.id ? "var(--accent)" : "var(--fg-muted)",
+              borderBottom: aba === a.id ? "2px solid var(--accent)" : "2px solid transparent", marginBottom: -1,
             }}
           >
             {a.label}

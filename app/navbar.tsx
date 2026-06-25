@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./theme-toggle";
 
 const COMERCIAL = "https://comercial.crm-operacional.com.br";
 const RETENCAO = "https://retencao.crm-operacional.com.br";
@@ -60,6 +61,7 @@ export function Navbar() {
             Gerente
           </span>
         </div>
+        <ThemeToggle />
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
           style={{

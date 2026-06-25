@@ -106,31 +106,31 @@ export function TabMarketing({ ano, mes }: { ano: number; mes: number }) {
 
   if (loading) return <Carregando />;
 
-  const inputStyle: React.CSSProperties = { width: 110, padding: "5px 8px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13, textAlign: "right" };
-  const th: React.CSSProperties = { padding: "8px 8px", color: "#6b7280", fontWeight: 600, whiteSpace: "nowrap" };
+  const inputStyle: React.CSSProperties = { width: 110, padding: "5px 8px", border: "1px solid var(--border-strong)", borderRadius: 6, fontSize: 13, textAlign: "right" };
+  const th: React.CSSProperties = { padding: "8px 8px", color: "var(--fg-muted)", fontWeight: 600, whiteSpace: "nowrap" };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Topo: custo equipe + consolidados */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-        <div style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 14px", backgroundColor: "#fff" }}>
-          <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4 }}>Custo equipe comercial (mês)</div>
+        <div style={{ border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px", backgroundColor: "var(--surface)" }}>
+          <div style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 4 }}>Custo equipe comercial (mês)</div>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontSize: 13, color: "#6b7280" }}>R$</span>
+            <span style={{ fontSize: 13, color: "var(--fg-muted)" }}>R$</span>
             <input value={custo} onChange={(e) => setCusto(e.target.value)} placeholder="0,00" style={{ ...inputStyle, width: "100%", fontWeight: 700, fontSize: 16 }} />
           </div>
         </div>
-        <CardTopo label="CAC equipe / venda" valor={fmtCacCents(calc.cacEquipe)} cor="#6366f1" />
-        <CardTopo label="Total de vendas" valor={String(calc.totalVendas)} cor="#15803d" />
-        <CardTopo label="Investimento total" valor={fmtBRL(calc.investTotal / 100)} cor="#0369a1" />
-        <CardTopo label="CAC TOTAL GERAL" valor={fmtCacCents(calc.cacTotalGeral)} cor="#b45309" bg="#fffbeb" />
+        <CardTopo label="CAC equipe / venda" valor={fmtCacCents(calc.cacEquipe)} cor="var(--indigo)" />
+        <CardTopo label="Total de vendas" valor={String(calc.totalVendas)} cor="var(--success)" />
+        <CardTopo label="Investimento total" valor={fmtBRL(calc.investTotal / 100)} cor="var(--info)" />
+        <CardTopo label="CAC TOTAL GERAL" valor={fmtCacCents(calc.cacTotalGeral)} cor="var(--warning-strong)" bg="var(--warning-bg)" />
       </div>
 
       <Secao titulo="CAC por Canal">
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid #e5e7eb", backgroundColor: "#f9fafb" }}>
+              <tr style={{ borderBottom: "2px solid var(--border)", backgroundColor: "var(--surface-2)" }}>
                 <th style={{ ...th, textAlign: "left" }}>Canal</th>
                 <th style={{ ...th, textAlign: "right" }}>Leads totais</th>
                 <th style={{ ...th, textAlign: "right" }}>Inviáveis</th>
@@ -145,12 +145,12 @@ export function TabMarketing({ ano, mes }: { ano: number; mes: number }) {
             </thead>
             <tbody>
               {calc.linhas.map((l, i) => (
-                <tr key={l.canal} style={{ borderBottom: "1px solid #f3f4f6", backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+                <tr key={l.canal} style={{ borderBottom: "1px solid var(--border)", backgroundColor: i % 2 === 0 ? "var(--surface)" : "var(--surface-2)" }}>
                   <td style={{ padding: "8px", fontWeight: 600 }}>{ORIGEM_LABEL[l.canal] ?? l.canal}</td>
                   <td style={{ padding: "8px", textAlign: "right" }}>{l.leadsTotais}</td>
-                  <td style={{ padding: "8px", textAlign: "right", color: "#b91c1c" }}>{l.inviaveis || "—"}</td>
-                  <td style={{ padding: "8px", textAlign: "right", color: "#6366f1" }}>{l.leadsAptos}</td>
-                  <td style={{ padding: "8px", textAlign: "right", fontWeight: 700, color: "#15803d" }}>{l.vendas}</td>
+                  <td style={{ padding: "8px", textAlign: "right", color: "var(--danger)" }}>{l.inviaveis || "—"}</td>
+                  <td style={{ padding: "8px", textAlign: "right", color: "var(--indigo)" }}>{l.leadsAptos}</td>
+                  <td style={{ padding: "8px", textAlign: "right", fontWeight: 700, color: "var(--success)" }}>{l.vendas}</td>
                   <td style={{ padding: "8px", textAlign: "right" }}>{l.conversao === null ? "—" : fmtPctRaw(l.conversao)}</td>
                   <td style={{ padding: "8px", textAlign: "right" }}>
                     <input
@@ -161,24 +161,24 @@ export function TabMarketing({ ano, mes }: { ano: number; mes: number }) {
                       inputMode="decimal"
                     />
                   </td>
-                  <td style={{ padding: "8px", textAlign: "right", color: "#0369a1" }}>{fmtCacCents(l.cacCanal)}</td>
-                  <td style={{ padding: "8px", textAlign: "right", color: "#6366f1" }}>{fmtCacCents(l.cacEquipe)}</td>
-                  <td style={{ padding: "8px", textAlign: "right", fontWeight: 700, color: "#b45309" }}>{fmtCacCents(l.cacTotal)}</td>
+                  <td style={{ padding: "8px", textAlign: "right", color: "var(--info)" }}>{fmtCacCents(l.cacCanal)}</td>
+                  <td style={{ padding: "8px", textAlign: "right", color: "var(--indigo)" }}>{fmtCacCents(l.cacEquipe)}</td>
+                  <td style={{ padding: "8px", textAlign: "right", fontWeight: 700, color: "var(--warning-strong)" }}>{fmtCacCents(l.cacTotal)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
-              <tr style={{ borderTop: "2px solid #e5e7eb", backgroundColor: "#f9fafb", fontWeight: 700 }}>
+              <tr style={{ borderTop: "2px solid var(--border)", backgroundColor: "var(--surface-2)", fontWeight: 700 }}>
                 <td style={{ padding: "8px" }}>Total</td>
                 <td style={{ padding: "8px", textAlign: "right" }}>{calc.totLeads}</td>
-                <td style={{ padding: "8px", textAlign: "right", color: "#b91c1c" }}>{calc.totInv || "—"}</td>
-                <td style={{ padding: "8px", textAlign: "right", color: "#6366f1" }}>{calc.totAptos}</td>
-                <td style={{ padding: "8px", textAlign: "right", color: "#15803d" }}>{calc.totalVendas}</td>
+                <td style={{ padding: "8px", textAlign: "right", color: "var(--danger)" }}>{calc.totInv || "—"}</td>
+                <td style={{ padding: "8px", textAlign: "right", color: "var(--indigo)" }}>{calc.totAptos}</td>
+                <td style={{ padding: "8px", textAlign: "right", color: "var(--success)" }}>{calc.totalVendas}</td>
                 <td style={{ padding: "8px", textAlign: "right" }}>{calc.totAptos > 0 ? fmtPctRaw((calc.totalVendas / calc.totAptos) * 100) : "—"}</td>
-                <td style={{ padding: "8px", textAlign: "right", color: "#0369a1" }}>{fmtBRL(calc.investTotal / 100)}</td>
+                <td style={{ padding: "8px", textAlign: "right", color: "var(--info)" }}>{fmtBRL(calc.investTotal / 100)}</td>
                 <td style={{ padding: "8px", textAlign: "right" }} />
                 <td style={{ padding: "8px", textAlign: "right" }} />
-                <td style={{ padding: "8px", textAlign: "right", color: "#b45309" }}>{fmtCacCents(calc.cacTotalGeral)}</td>
+                <td style={{ padding: "8px", textAlign: "right", color: "var(--warning-strong)" }}>{fmtCacCents(calc.cacTotalGeral)}</td>
               </tr>
             </tfoot>
           </table>
@@ -188,14 +188,14 @@ export function TabMarketing({ ano, mes }: { ano: number; mes: number }) {
           <button
             onClick={salvar}
             disabled={saving}
-            style={{ padding: "8px 18px", backgroundColor: saving ? "#9ca3af" : "#f97316", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: saving ? "not-allowed" : "pointer" }}
+            style={{ padding: "8px 18px", backgroundColor: saving ? "var(--fg-subtle)" : "var(--accent)", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: saving ? "not-allowed" : "pointer" }}
           >
             {saving ? "Salvando..." : "Salvar investimentos e custo"}
           </button>
-          {msg && <span style={{ fontSize: 13, color: msg.includes("✓") ? "#15803d" : "#b91c1c", fontWeight: 600 }}>{msg}</span>}
+          {msg && <span style={{ fontSize: 13, color: msg.includes("✓") ? "var(--success)" : "var(--danger)", fontWeight: 600 }}>{msg}</span>}
         </div>
 
-        <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 12, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 12, lineHeight: 1.5 }}>
           Leads aptos = leads totais − inviáveis (região, porte e inadimplência). Conversão = vendas ÷ leads aptos.
           CAC do canal = investimento ÷ vendas do canal. CAC equipe = custo da equipe comercial ÷ total de vendas
           (mesmo valor para todo canal). CAC total = CAC do canal + CAC equipe.

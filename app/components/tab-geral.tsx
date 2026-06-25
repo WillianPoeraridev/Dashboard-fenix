@@ -34,7 +34,7 @@ export function TabGeral({ ano, mes }: { ano: number; mes: number }) {
   if (!kpi) return null;
 
   const card: React.CSSProperties = {
-    backgroundColor: "#fff", borderRadius: 10, padding: "20px 24px",
+    backgroundColor: "var(--surface)", borderRadius: 10, padding: "20px 24px",
     boxShadow: "0 1px 3px rgba(0,0,0,0.08)", flex: 1, minWidth: 180,
   };
 
@@ -42,50 +42,50 @@ export function TabGeral({ ano, mes }: { ano: number; mes: number }) {
     <>
       <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
         <div style={card}>
-          <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>MRR Ganho</p>
-          <p style={{ fontSize: 24, fontWeight: 700, color: "#15803d", margin: "4px 0" }}>{fmtBRL(kpi.mrrGanhoCents / 100)}</p>
-          <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>{kpi.totalVendas} vendas</p>
+          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0 }}>MRR Ganho</p>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--success)", margin: "4px 0" }}>{fmtBRL(kpi.mrrGanhoCents / 100)}</p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>{kpi.totalVendas} vendas</p>
         </div>
         <div style={card}>
-          <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>MRR Perdido</p>
-          <p style={{ fontSize: 24, fontWeight: 700, color: "#b91c1c", margin: "4px 0" }}>{fmtBRL(kpi.mrrPerdidoCents / 100)}</p>
-          <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>{kpi.totalCancelados} cancelamentos</p>
+          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0 }}>MRR Perdido</p>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--danger)", margin: "4px 0" }}>{fmtBRL(kpi.mrrPerdidoCents / 100)}</p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>{kpi.totalCancelados} cancelamentos</p>
         </div>
         <div style={card}>
-          <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>MRR Líquido</p>
-          <p style={{ fontSize: 24, fontWeight: 700, color: kpi.mrrLiquidoCents >= 0 ? "#15803d" : "#b91c1c", margin: "4px 0" }}>{fmtBRL(kpi.mrrLiquidoCents / 100)}</p>
-          <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>ganho − perdido</p>
+          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0 }}>MRR Líquido</p>
+          <p style={{ fontSize: 24, fontWeight: 700, color: kpi.mrrLiquidoCents >= 0 ? "var(--success)" : "var(--danger)", margin: "4px 0" }}>{fmtBRL(kpi.mrrLiquidoCents / 100)}</p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>ganho − perdido</p>
         </div>
         <div style={card}>
-          <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>Taxa de Retenção</p>
-          <p style={{ fontSize: 24, fontWeight: 700, color: "#1e40af", margin: "4px 0" }}>{fmtPctRaw(kpi.taxaRetencao)}</p>
-          <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>{kpi.totalRetidos} retidos de {kpi.totalRetidos + kpi.totalCancelados}</p>
+          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0 }}>Taxa de Retenção</p>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--info-strong)", margin: "4px 0" }}>{fmtPctRaw(kpi.taxaRetencao)}</p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>{kpi.totalRetidos} retidos de {kpi.totalRetidos + kpi.totalCancelados}</p>
         </div>
         <div style={card}>
-          <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>Conversão de Leads</p>
-          <p style={{ fontSize: 24, fontWeight: 700, color: "#7c3aed", margin: "4px 0" }}>{fmtPctRaw(kpi.conversaoLeads)}</p>
-          <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>{kpi.totalVendas} vendas / {kpi.totalLeads} leads</p>
+          <p style={{ fontSize: 12, color: "var(--fg-muted)", margin: 0 }}>Conversão de Leads</p>
+          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--violet)", margin: "4px 0" }}>{fmtPctRaw(kpi.conversaoLeads)}</p>
+          <p style={{ fontSize: 11, color: "var(--fg-subtle)", margin: 0 }}>{kpi.totalVendas} vendas / {kpi.totalLeads} leads</p>
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <Secao titulo="🔝 Top Motivos de Cancelamento">
-          {kpi.topMotivos.length === 0 && <p style={{ color: "#9ca3af", fontSize: 13 }}>Nenhum cancelamento no período.</p>}
+          {kpi.topMotivos.length === 0 && <p style={{ color: "var(--fg-subtle)", fontSize: 13 }}>Nenhum cancelamento no período.</p>}
           {kpi.topMotivos.map((m, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid #f3f4f6", fontSize: 13 }}>
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--border)", fontSize: 13 }}>
               <span>{m.motivo}</span>
               <span style={{ fontWeight: 600 }}>{m.count}</span>
             </div>
           ))}
         </Secao>
         <Secao titulo="📍 Performance por Região">
-          {kpi.porRegiao.length === 0 && <p style={{ color: "#9ca3af", fontSize: 13 }}>Sem dados no período.</p>}
+          {kpi.porRegiao.length === 0 && <p style={{ color: "var(--fg-subtle)", fontSize: 13 }}>Sem dados no período.</p>}
           {kpi.porRegiao.map((r, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid #f3f4f6", fontSize: 13 }}>
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--border)", fontSize: 13 }}>
               <span style={{ fontWeight: 500 }}>{r.regiao}</span>
               <div style={{ display: "flex", gap: 12 }}>
-                <span style={{ color: "#15803d" }}>+{fmtBRL(r.ganho / 100)}</span>
-                <span style={{ color: "#b91c1c" }}>−{fmtBRL(r.perdido / 100)}</span>
+                <span style={{ color: "var(--success)" }}>+{fmtBRL(r.ganho / 100)}</span>
+                <span style={{ color: "var(--danger)" }}>−{fmtBRL(r.perdido / 100)}</span>
               </div>
             </div>
           ))}

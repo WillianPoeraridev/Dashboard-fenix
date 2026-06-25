@@ -40,6 +40,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: "100vh",
+      colorScheme: "light",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",

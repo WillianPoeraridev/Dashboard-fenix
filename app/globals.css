@@ -1,0 +1,87 @@
+/* Design tokens — tema claro (padrão) e escuro (.dark no <html>).
+   Os apps usam estilo inline; por isso as cores vivem em CSS variables e os
+   componentes referenciam var(--token). O toggle de tema só troca a classe
+   .dark no <html>, e todas as cores acompanham. */
+
+:root {
+  color-scheme: light;
+
+  /* superfícies / neutros */
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  /* texto */
+  --fg: #111827;
+  --fg-secondary: #374151;
+  --fg-muted: #6b7280;
+  --fg-subtle: #9ca3af;
+
+  /* marca */
+  --accent: #f97316;
+  --accent-contrast: #ffffff;
+
+  /* status */
+  --success: #15803d;
+  --success-bg: #dcfce7;
+  --danger: #b91c1c;
+  --danger-strong: #991b1b;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --warning: #d97706;
+  --warning-strong: #b45309;
+  --warning-deep: #a16207;
+  --warning-bg: #fffbeb;
+  --warning-bg-strong: #fef9c3;
+  --highlight-bg: #fefce8;
+  --info: #0369a1;
+  --info-strong: #1e40af;
+  --indigo: #6366f1;
+  --violet: #7c3aed;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: #0f1419;
+  --surface: #161c27;
+  --surface-2: #1b2230;
+  --border: #2a3340;
+  --border-strong: #374151;
+
+  --fg: #e5e7eb;
+  --fg-secondary: #cbd2dc;
+  --fg-muted: #9aa4b2;
+  --fg-subtle: #6b7280;
+
+  --accent: #f97316;
+  --accent-contrast: #ffffff;
+
+  --success: #4ade80;
+  --success-bg: rgba(34, 197, 94, 0.16);
+  --danger: #f87171;
+  --danger-strong: #fca5a5;
+  --danger-bg: rgba(239, 68, 68, 0.14);
+  --danger-border: rgba(239, 68, 68, 0.35);
+  --warning: #fbbf24;
+  --warning-strong: #fcd34d;
+  --warning-deep: #fde68a;
+  --warning-bg: rgba(245, 158, 11, 0.14);
+  --warning-bg-strong: rgba(245, 158, 11, 0.2);
+  --highlight-bg: rgba(234, 179, 8, 0.14);
+  --info: #38bdf8;
+  --info-strong: #60a5fa;
+  --indigo: #818cf8;
+  --violet: #a78bfa;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+}
